@@ -1,0 +1,73 @@
+name: ShellCheck
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "linux/bin/**"
+      - "linux/lib/**"
+      - "linux/modules/**"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "linux/bin/**"
+      - "linux/lib/**"
+      - "linux/modules/**"
+
+jobs:
+  shellcheck:
+    name: ShellCheck Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on bin
+        run: |
+          shellcheck \
+            --severity=warning \
+            --shell=bash \
+            linux/bin/troubleshooter
+
+      - name: Run ShellCheck on lib
+        run: |
+          shellcheck \
+            --severity=warning \
+            --shell=bash \
+            linux/lib/common.sh \
+            linux/lib/output.sh \
+            linux/lib/runner.sh \
+            linux/lib/tui.sh
+
+      - name: Run ShellCheck on modules
+        run: |
+          shellcheck \
+            --severity=warning \
+            --shell=bash \
+            linux/modules/capture_state.sh
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## ShellCheck Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          FILES=(
+            linux/bin/troubleshooter
+            linux/lib/common.sh
+            linux/lib/output.sh
+            linux/lib/runner.sh
+            linux/lib/tui.sh
+            linux/modules/capture_state.sh
+          )
+          for f in "${FILES[@]}"; do
+            COUNT=$(shellcheck --severity=warning --shell=bash "$f" 2>&1 | wc -l || echo 0)
+            if shellcheck --severity=warning --shell=bash "$f" > /dev/null 2>&1; then
+              echo "- ✅ \`$f\` — no issues" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- ❌ \`$f\` — issues found" >> $GITHUB_STEP_SUMMARY
+            fi
+          done

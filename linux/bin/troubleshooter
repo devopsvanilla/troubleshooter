@@ -1,0 +1,218 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+LINUX_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+
+# shellcheck source=../lib/common.sh
+source "${LINUX_DIR}/lib/common.sh"
+# shellcheck source=../lib/output.sh
+source "${LINUX_DIR}/lib/output.sh"
+# shellcheck source=../lib/runner.sh
+source "${LINUX_DIR}/lib/runner.sh"
+# shellcheck source=../modules/capture_state.sh
+source "${LINUX_DIR}/modules/capture_state.sh"
+# shellcheck source=../lib/tui.sh
+source "${LINUX_DIR}/lib/tui.sh"
+
+show_usage() {
+  cat <<'EOF'
+Usage:
+  troubleshooter                    Start interactive menu
+  troubleshooter capture-state      Run initial server assessment
+
+Options:
+  --profile <quick|standard|deep>   Capture profile (default: standard)
+  --mask-sensitive                  Mask common secrets in sensitive outputs (history collection)
+  --no-tui                          Avoid dialog/whiptail even if available
+  --help                            Show this help
+
+Examples:
+  troubleshooter
+  troubleshooter capture-state --profile quick
+  troubleshooter capture-state --profile deep --mask-sensitive
+  troubleshooter --no-tui capture-state --profile deep
+EOF
+}
+
+run_capture_state() {
+  local profile="${1:-standard}"
+  local output_dir="${2:-}"
+  # Força flush do histórico da sessão atual do usuário corrente (se aplicável)
+  if [ -n "${BASH_VERSION:-}" ]; then
+    history -a
+  fi
+  if [ -n "${ZSH_VERSION:-}" ]; then
+    fc -AI
+  fi
+  capture_state_main "${profile}" "${output_dir}"
+}
+
+main_menu() {
+  while true; do
+    local choice
+    choice="$(tui_menu "Linux Troubleshooter" \
+      "Selecione uma funcionalidade" \
+      "capture-state" "Capture state (snapshot inicial do servidor)" \
+      "live-observe" "Placeholder: observacao ao vivo" \
+      "service-drilldown" "Placeholder: analise por servico" \
+      "network-triage" "Placeholder: triagem de rede" \
+      "quit" "Sair")"
+
+    case "${choice}" in
+      capture-state)
+        local profile
+        profile="$(tui_menu "Capture state" \
+          "Escolha o perfil de coleta" \
+          "quick" "Baixo impacto, coleta essencial" \
+          "standard" "Padrao recomendado" \
+          "deep" "Mais detalhado, mais lento")"
+        profile="${profile:-standard}"
+
+        # Novo: Pergunta se deseja mascarar dados sensíveis
+        local mask_sensitive_choice mask_sensitive
+        mask_sensitive=0
+        mask_sensitive_choice="$(tui_menu "Mascarar dados sensíveis?" \
+          "Deseja mascarar senhas/tokens em históricos?" \
+          "sim" "Mascarar dados sensíveis" \
+          "nao" "Não mascarar (padrão)")"
+        if [[ "${mask_sensitive_choice}" == "sim" ]]; then
+          mask_sensitive=1
+        fi
+
+        if [[ ${mask_sensitive} -eq 1 ]]; then
+          export TROUBLESHOOTER_MASK_SENSITIVE=1
+        else
+          unset TROUBLESHOOTER_MASK_SENSITIVE
+        fi
+
+        # Novo: Pergunta se deseja executar com sudo
+        local sudo_choice force_sudo
+        force_sudo=0
+        sudo_choice="$(tui_menu "Executar com sudo?" \
+          "Deseja tentar executar comandos privilegiados com sudo?" \
+          "sim" "Tentar sudo para comandos privilegiados" \
+          "nao" "Não usar sudo (padrão)")"
+        if [[ "${sudo_choice}" == "sim" ]]; then
+          force_sudo=1
+        fi
+
+        if [[ ${force_sudo} -eq 1 ]]; then
+          export TROUBLESHOOTER_FORCE_SUDO=1
+        else
+          unset TROUBLESHOOTER_FORCE_SUDO
+        fi
+
+        # Pergunta diretório de saída (com fallback)
+        local default_output_dir output_dir
+        default_output_dir="$(pwd)/start-session"
+        while true; do
+          output_dir="$(tui_input_dir "Diretório de saída" "Informe o diretório onde os arquivos de log serão gerados" "${default_output_dir}")"
+          if [[ -z "$output_dir" ]]; then
+            tui_info "Operação cancelada" "Saindo do fluxo de captura."
+            continue 2
+          fi
+          # Já garantido existir pela tui_input_dir
+          break
+        done
+        # Validação do perfil
+        if [[ "$profile" != "quick" && "$profile" != "standard" && "$profile" != "deep" ]]; then
+          log_error "Perfil inválido: $profile"
+          tui_pause "Perfil inválido. Operação cancelada."
+          continue
+        fi
+        run_capture_state "${profile}" "${output_dir}"
+        # Descobre o último arquivo .tar.gz gerado
+        local last_archive
+        last_archive=$(find "$output_dir" -maxdepth 1 -type f -name '*.tar.gz' -printf '%T@ %p\n' 2>/dev/null | sort -n | tail -n 1 | awk '{print $2}')
+        if [[ -n "$last_archive" ]]; then
+          tui_info "Arquivo gerado" "A captura foi concluída. O arquivo compactado está em:\n$last_archive"
+        else
+          tui_info "Aviso" "A captura foi concluída, mas não foi possível localizar o arquivo compactado."
+        fi
+        tui_pause "Capture state concluído."
+        ;;
+      live-observe|service-drilldown|network-triage)
+        tui_info "Em breve" "Essa funcionalidade ainda sera implementada. O menu ja esta pronto para receber novos modulos."
+        ;;
+      quit|"")
+        return 0
+        ;;
+      *)
+        tui_info "Opcao invalida" "Selecione uma opcao valida."
+        ;;
+    esac
+  done
+}
+
+main() {
+  local profile="standard"
+  local command_name=""
+  local force_plain_tui=0
+  local mask_sensitive=0
+  local output_dir=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      capture-state)
+        command_name="capture-state"
+        shift
+        ;;
+      --profile)
+        profile="${2:-}"
+        if [[ -z "${profile}" ]]; then
+          die "Missing value for --profile"
+        fi
+        shift 2
+        ;;
+      --output-dir)
+        output_dir="${2:-}"
+        if [[ -z "${output_dir}" ]]; then
+          die "Missing value for --output-dir"
+        fi
+        shift 2
+        ;;
+      --no-tui)
+        force_plain_tui=1
+        shift
+        ;;
+      --mask-sensitive)
+        mask_sensitive=1
+        shift
+        ;;
+      --help|-h)
+        show_usage
+        return 0
+        ;;
+      *)
+        die "Unknown argument: $1"
+        ;;
+    esac
+  done
+
+  if [[ "${profile}" != "quick" && "${profile}" != "standard" && "${profile}" != "deep" ]]; then
+    die "Invalid profile: ${profile}. Use quick, standard or deep."
+  fi
+
+  if [[ ${force_plain_tui} -eq 1 ]]; then
+     export TUI_FORCE_PLAIN=1
+  fi
+
+  if [[ ${mask_sensitive} -eq 1 ]]; then
+    export TROUBLESHOOTER_MASK_SENSITIVE=1
+  fi
+
+  case "${command_name}" in
+    capture-state)
+      run_capture_state "${profile}" "${output_dir}"
+      ;;
+    "")
+      main_menu
+      ;;
+    *)
+      die "Unsupported command: ${command_name}"
+      ;;
+  esac
+}
+
+main "$@"

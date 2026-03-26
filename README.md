@@ -1,6 +1,11 @@
 # troubleshooter
 
-![Trobleshoot](./linux/_images/Troubleshooter.png)
+[![ShellCheck](https://github.com/devopsvanilla/troubleshooter/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/devopsvanilla/troubleshooter/actions/workflows/shellcheck.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Shell](https://img.shields.io/badge/shell-bash-blue)
+![Platform](https://img.shields.io/badge/platform-Linux-lightgrey)
+
+![Troubleshoot](./linux/_images/Troubleshooter.png)
 
 Toolkit de troubleshooting Linux com foco em coleta estruturada de evidencias para diagnostico seguro e orientado por dados.
 
@@ -27,7 +32,8 @@ O MVP atual entrega:
 Guias de manutencao:
 
 - `AGENTS.md` — regras operacionais para agentes e contribuidores;
-- `SKILLS.md` — catalogo de capacidades atuais e futuras do projeto.
+- `SKILLS.md` — catalogo de capacidades atuais e futuras do projeto;
+- `CONTRIBUTING.md` — como contribuir com o projeto.
 
 ## Inspiracao e ferramentas similares
 
@@ -53,6 +59,7 @@ Para material de divulgacao e uso rapido (incluindo versao base para imagem), ve
 
 - `AGENTS.md` — guia de governanca e fluxo de manutencao
 - `SKILLS.md` — mapa de competencias e expansao do projeto
+- `CONTRIBUTING.md` — guia de contribuicao
 - `linux/bin/troubleshooter` — entrypoint principal
 - `linux/lib/` — funcoes compartilhadas (TUI, execucao, persistencia)
 - `linux/modules/` — modulos de funcionalidades do menu
@@ -73,16 +80,19 @@ Opcionais, mas recomendadas:
 
 ## Uso
 
-
 Interativo:
 
-`./linux/bin/troubleshooter`
+```bash
+./linux/bin/troubleshooter
+```
 
-Ao usar o menu interativo (TUI), será perguntado se deseja tentar executar comandos privilegiados com sudo. Caso aceite, todos os comandos possíveis serão executados com sudo automaticamente (quando disponível).
+Ao usar o menu interativo (TUI), sera perguntado se deseja tentar executar comandos privilegiados com sudo. Caso aceite, todos os comandos possiveis serao executados com sudo automaticamente (quando disponivel).
 
 Execucao direta da captura:
 
-`./linux/bin/troubleshooter capture-state`
+```bash
+./linux/bin/troubleshooter capture-state
+```
 
 Perfis disponiveis:
 
@@ -90,18 +100,18 @@ Perfis disponiveis:
 - `standard` — perfil recomendado
 - `deep` — coleta ampliada, pode ser mais lenta
 
-Perfis mais amplos coletam também:
-- arquivos de configuração de rede (hosts, nsswitch, netplan, NetworkManager, firewalld, ufw, etc.);
+Perfis mais amplos coletam tambem:
+- arquivos de configuracao de rede (hosts, nsswitch, netplan, NetworkManager, firewalld, ufw, etc.);
 - status de firewalls (`firewalld`, `ufw`), NetworkManager, netplan;
-- comandos de diagnóstico DNS (`dig`, `nslookup`), rotas (`route`), interfaces (`ifconfig`), além dos já existentes (`ip`, `ss`, etc.).
+- comandos de diagnostico DNS (`dig`, `nslookup`), rotas (`route`), interfaces (`ifconfig`), alem dos ja existentes (`ip`, `ss`, etc.).
 
 Exemplos:
 
-`./linux/bin/troubleshooter capture-state --profile quick`
-
-`./linux/bin/troubleshooter --no-tui capture-state --profile deep`
-
-`./linux/bin/troubleshooter capture-state --profile deep --mask-sensitive`
+```bash
+./linux/bin/troubleshooter capture-state --profile quick
+./linux/bin/troubleshooter --no-tui capture-state --profile deep
+./linux/bin/troubleshooter capture-state --profile deep --mask-sensitive
+```
 
 Opcao adicional:
 
@@ -140,6 +150,10 @@ O menu foi preparado para receber novos modulos, como:
 
 Veja `linux/docs/architecture.md` para o contrato basico de extensao.
 
+## Contribuindo
+
+Contribuicoes sao bem-vindas! Leia o [CONTRIBUTING.md](CONTRIBUTING.md) para entender o fluxo de trabalho, convencoes de commit e padroes de codigo.
+
 ## Licenca
 
-Este projeto e distribuido sob a licenca **MIT**. Veja o arquivo `LICENSE` para os termos completos.
+Este projeto e distribuido sob a licenca **MIT**. Veja o arquivo [LICENSE](LICENSE) para os termos completos.

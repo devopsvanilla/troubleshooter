@@ -1,29 +1,13 @@
 # Linux Troubleshooting Cheat Sheet (v2)
 
+![Trobleshoot](../_images/Troubleshooter.png)
+
 Cheat sheet oficial do projeto `troubleshooter`:
 
 - o projeto **automatiza** comandos de troubleshooting amplamente conhecidos;
 - os mesmos comandos podem ser executados **manualmente** e de forma isolada;
 - a coleta antes/depois de mudancas gera evidencia e controle de impacto.
 
-## Mensagem principal para o material visual
-
-**Titulo sugerido da imagem:**
-`Troubleshooter Linux — automacao de comandos que voce ja conhece`
-
-**Subtitulo sugerido:**
-`Capture o estado do host antes e depois de mudancas para gerar evidencia e medir impacto.`
-
-## Como usar (para o bloco inicial da imagem)
-
-- Automacao (recomendado):
-  - `./linux/bin/troubleshooter capture-state --profile quick`
-  - `./linux/bin/troubleshooter capture-state --profile standard`
-  - `./linux/bin/troubleshooter capture-state --profile deep`
-- Execucao manual (quando necessario):
-  - rode os comandos abaixo por assunto, no seu terminal.
-
----
 
 ## Comandos automatizados por assunto
 
@@ -213,10 +197,3 @@ Legenda de perfil:
 | 🔬 | `dmidecode` (priv.) | Informacoes de hardware e BIOS (DMI/SMBIOS) | `sudo -n dmidecode` |
 | 🔬 | `getent passwd` | Contas locais/remotas visiveis | `getent passwd` |
 
----
-
-## Texto curto sugerido para a arte (rodape)
-
-`Este projeto nao reinventa comandos: ele organiza, automatiza e registra evidencias com seguranca operacional.`
-
-`Voce pode rodar cada comando separadamente, mas aqui eles ganham execucao padronizada, timeout, status e artefatos por sessao.`

@@ -1,6 +1,6 @@
 # troubleshooter
 
-![Trobleshoot](./linux/_images/troubleshooter.png)
+![Trobleshoot](./linux/_images/Troubleshooter.png)
 
 Toolkit de troubleshooting Linux com foco em coleta estruturada de evidencias para diagnostico seguro e orientado por dados.
 

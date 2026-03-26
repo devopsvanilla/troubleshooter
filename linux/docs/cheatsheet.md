@@ -197,3 +197,6 @@ Legenda de perfil:
 | 🔬 | `dmidecode` (priv.) | Informacoes de hardware e BIOS (DMI/SMBIOS) | `sudo -n dmidecode` |
 | 🔬 | `getent passwd` | Contas locais/remotas visiveis | `getent passwd` |
 
+## Licenca
+
+Este projeto e distribuido sob a licenca **MIT**. Veja o arquivo `LICENSE` para os termos completos.

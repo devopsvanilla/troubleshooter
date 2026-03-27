@@ -9,6 +9,20 @@ Cheat sheet oficial do projeto `troubleshooter`:
 - a coleta antes/depois de mudancas gera evidencia e controle de impacto.
 
 
+## Uso da CLI (Troubleshooter)
+
+```bash
+troubleshooter capture-state [opções]
+```
+
+| Parâmetro | Descrição |
+|---|---|
+| `--profile <perfil>` | Perfil de coleta (`quick`, `standard`, `deep`). Padrão: `standard` |
+| `--output-dir <dir>` | Onde salvar os arquivos gerados. Padrão: `./start-session` |
+| `--no-tui` | Evita carregar interface gráfica via terminal (fallback plain text) |
+| `--mask-sensitive` | Mascara senhas e tokens na coleta de histórico |
+| `--help`, `-h` | Exibe a tela de ajuda da ferramenta e sai |
+
 ## Comandos automatizados por assunto
 
 Legenda de perfil:

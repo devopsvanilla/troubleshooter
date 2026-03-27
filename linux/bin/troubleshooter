@@ -23,6 +23,7 @@ Usage:
 
 Options:
   --profile <quick|standard|deep>   Capture profile (default: standard)
+  --output-dir <dir>                Output directory (default: ./start-session)
   --mask-sensitive                  Mask common secrets in sensitive outputs (history collection)
   --no-tui                          Avoid dialog/whiptail even if available
   --help                            Show this help
@@ -31,7 +32,7 @@ Examples:
   troubleshooter
   troubleshooter capture-state --profile quick
   troubleshooter capture-state --profile deep --mask-sensitive
-  troubleshooter --no-tui capture-state --profile deep
+  troubleshooter --no-tui capture-state --profile deep --output-dir /tmp/coleta
 EOF
 }
 

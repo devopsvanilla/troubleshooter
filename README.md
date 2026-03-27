@@ -80,15 +80,39 @@ Opcionais, mas recomendadas:
 
 ## Uso
 
-Interativo:
+### Execução Interativa (TUI)
+
+Ao executar a ferramenta sem argumentos, o menu interativo será iniciado:
 
 ```bash
 ./linux/bin/troubleshooter
 ```
 
-Ao usar o menu interativo (TUI), sera perguntado se deseja tentar executar comandos privilegiados com sudo. Caso aceite, todos os comandos possiveis serao executados com sudo automaticamente (quando disponivel).
+O fluxo interativo guiará o usuário pelas seguintes opções de configuração:
 
-Execucao direta da captura:
+1. **Seleção de Funcionalidade**: Escolha a ação principal (ex: `capture-state`).
+
+   ![tela do menu principal aqui](linux/_images/start-session_tui-feature.png)
+
+2. **Perfil de Coleta**: Defina o nível de profundidade (`quick`, `standard` ou `deep`).
+
+   ![tela do menu de opções de perfil de coleta](linux/_images/start-session_tui-profile.png)
+
+3. **Mascarar Dados Sensíveis**: Escolha se deseja mascarar senhas/tokens em históricos.
+
+   ![tela do menu de confirmação de mascaramento de dados](linux/_images/start-session_tui-mask.png)
+
+4. **Executar com Sudo**: Determine se os comandos privilegiados devem tentar usar `sudo`.
+
+   ![tela do menu de escalação de privilégios (sudo)](linux/_images/start-session_tui-sudo.png)
+
+5. **Diretório de Saída**: Indique o diretório base onde os resultados serão gravados.
+
+   ![tela do prompt de input do diretório de saída](linux/_images/start-session_tui-save.png)
+
+### Execução Direta (Automática/CLI)
+
+Executando diretamente pelo terminal sem a necessidade de interação:
 
 ```bash
 ./linux/bin/troubleshooter capture-state
@@ -107,15 +131,19 @@ Perfis mais amplos coletam tambem:
 
 Exemplos:
 
-```bash
-./linux/bin/troubleshooter capture-state --profile quick
-./linux/bin/troubleshooter --no-tui capture-state --profile deep
-./linux/bin/troubleshooter capture-state --profile deep --mask-sensitive
-```
+`./linux/bin/troubleshooter capture-state --profile quick`
 
-Opcao adicional:
+`./linux/bin/troubleshooter --no-tui capture-state --profile deep`
 
-- `--mask-sensitive` — mascara padroes comuns de segredo em coletas sensiveis (como historico de comandos multiusuario).
+`./linux/bin/troubleshooter capture-state --profile deep --mask-sensitive`
+
+Opções disponíveis (CLI):
+
+- `--profile <quick|standard|deep>` — Define o perfil de coleta (padrão: `standard`).
+- `--output-dir <dir>` — Define o diretório onde salvar os dados coletados (padrão: `./start-session`).
+- `--no-tui` — Força a execução textual pura, evitando UI (`dialog`/`whiptail`).
+- `--mask-sensitive` — Mascara padrões comuns de segredo em coletas sensíveis (como histórico de comandos de shell multiusuário).
+- `--help` ou `-h` — Exibe a tela de ajuda com uso da CLI.
 
 ## Politica de privilegios
 
